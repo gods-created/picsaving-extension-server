@@ -1,0 +1,41 @@
+name: Python application
+
+on:
+  push:
+    branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+    - name: Set up Python 3.12
+      uses: actions/setup-python@v3
+      with:
+        python-version: "3.12"
+    - name: Install dependencies
+      run: |
+        pip install -r requirements.txt
+    - name: Run tests
+      id: tests
+      run: |
+        python tests.py
+      continue-on-error: true
+    - name: Rollback
+      if: steps.tests.outcome == 'failure'
+      run: |
+        git config --global user.name "Bohdan Terskow"
+        git config --global user.email "tersk.bo@gamil.com"
+        git reset --hard HEAD~1
+        git push origin master --force
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
