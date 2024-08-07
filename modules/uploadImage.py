@@ -36,6 +36,9 @@ class UploadImage(metaclass=Singleton):
 	@classmethod
 	def __s3_bucket(cls):
 		env = envReader.read()
+		if not isinstance(env, dict):
+			return '.env file not exists!'
+
 		aws_access_key_id = env.get('AWS_ACCESS_KEY_ID')
 		aws_secret_access_key = env.get('AWS_SECRET_ACCESS_KEY')
 		s3_bucket_name = env.get('S3_BUCKET_NAME')
@@ -75,8 +78,13 @@ class UploadImage(metaclass=Singleton):
 			filename = cls.__generate_filename()
 
 			s3_bucket = cls.__s3_bucket()
-			upload_fileobj = s3_bucket.upload_fileobj(bytes_image, Key=filename)
-			response_json['status'] = 'success'
+
+			try:
+				upload_fileobj = s3_bucket.upload_fileobj(bytes_image, Key=filename)
+				response_json['status'] = 'success'
+				
+			except:
+				response_json['err_description'] = s3_bucket
 
 		except Exception as e:
 			response_json['err_description'] = str(e)
