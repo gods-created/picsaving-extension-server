@@ -2,3 +2,4 @@ uvicorn
 fastapi
 boto3
 loguru
+requests
