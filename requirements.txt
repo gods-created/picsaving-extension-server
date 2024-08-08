@@ -3,3 +3,4 @@ fastapi
 boto3
 loguru
 requests
+starlette

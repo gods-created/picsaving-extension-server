@@ -1,10 +1,14 @@
 from fastapi import FastAPI, Query
-from fastapi.responses import RedirectResponse, JSONResponse
+from fastapi.responses import RedirectResponse, JSONResponse, HTMLResponse
 from fastapi.middleware.cors import CORSMiddleware
+from middlewares.error404 import Error404Middleware
 from modules.uploadImage import UploadImage
 import uvicorn
 
 app = FastAPI(docs_url=None, redoc_url=None)
+app.add_middleware(
+	Error404Middleware
+)
 app.add_middleware(
 	CORSMiddleware,
 	allow_origins=['*'],
@@ -15,6 +19,16 @@ app.add_middleware(
 @app.get('/', tags=['Default'], name='Root', status_code=301)
 def root():
 	return RedirectResponse('/docs')
+
+@app.get('/error404', tags=['Default'], name='Error 404', status_code=200)
+def root():
+	return HTMLResponse(
+		content='''
+			<div style="display:flex;align-items:center;justify-content:center;width:100%;height:100%;">
+				<h3>Page not found!</h3>
+			</div>
+		'''
+	)
 
 @app.post('/upload_image', tags=['API'], name='Upload image to bucket', status_code=200)
 def upload_image(url: str = Query(...)):
